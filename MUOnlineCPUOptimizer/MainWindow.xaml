@@ -21,7 +21,14 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="1">
+            <StackPanel Grid.Column="0">
+                <Button Content="Full Affinity" Width="150" Command="{Binding SetFullAffinity}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+                <Button Content="Half Affinity" Width="150" Command="{Binding SetHalfAffinity}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+                <Button Content="Quarter Affinity" Width="150" Command="{Binding SetQuarterAffinity}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+                <Button Content="Spread Affinity" Width="150" Command="{Binding SetSpreadAffinity}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+            </StackPanel>
+            
+            <Grid Grid.Column="1" Width="450">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -31,13 +38,15 @@
                     <TextBlock Grid.Row="0" Text="MU instances" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3" />
                     <Button Content="Refresh" Command="{Binding RefreshMuProcessess}" HorizontalAlignment="Center" />
                 </StackPanel>
-                
-                <ListView Grid.Row="1" ItemsSource="{Binding CpuOptimizer.MuProcessesList}">
+
+                <ListView Grid.Row="1" ItemsSource="{Binding CpuOptimizer.MuProcessesList}" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical" Height="Auto" HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                                     <TextBlock Text="{Binding MainWindowTitle}" FontWeight="Bold" />
+                                    <TextBlock Text=" " />
+                                    <TextBlock Text="{Binding ProcessName}" />
                                 </StackPanel>
                                 <TextBlock Text="{Binding ProcessFileName}" />
 
@@ -46,25 +55,20 @@
                                     <TextBlock Text="{Binding Affinity}"  />
                                 </StackPanel>
 
-                                <ListView ItemsSource="{Binding Threads}" IsEnabled="False">
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding CurrentPriority}" />
-                                                <TextBlock Text="{Binding ThreadState}" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="Base Priority: " FontWeight="Bold" />
+                                    <TextBlock Text="{Binding BasePriority}"  />
+                                </StackPanel>
 
                                 <StackPanel HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="Base Priority: " FontWeight="Bold" />
-                                        <TextBlock Text="{Binding BasePriority}"  />
+                                        <TextBlock Text="CPU use: " FontWeight="Bold" />
+                                        <TextBlock Text="{Binding CpuUsage}"  />
+                                        <TextBlock Text="%"  />
                                     </StackPanel>
                                     
                                     <ProgressBar HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="10" 
-                                                 Minimum="4" Maximum="24" Value="{Binding BasePriority, Mode=OneWay}" />
+                                                 Minimum="0" Maximum="100" Value="{Binding CpuUsage, Mode=OneWay}" />
                                 </StackPanel>
                             </StackPanel>
                         </DataTemplate>
