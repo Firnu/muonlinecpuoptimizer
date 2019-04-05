@@ -1,4 +1,4 @@
-﻿using MUOnlineCPUOptimizer.ViewModels;
+﻿using MUOnlineManager.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MUOnlineCPUOptimizer
+namespace MUOnlineManager
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -25,6 +25,12 @@ namespace MUOnlineCPUOptimizer
         {
             InitializeComponent();
             this.DataContext = new MainWindowViewModel();
+        }
+
+        private void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            MainWindowViewModel vm = (MainWindowViewModel)this.DataContext;
+            vm.CpuOptimizer.BringToFront();
         }
     }
 }

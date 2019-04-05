@@ -1,16 +1,18 @@
 ﻿using GalaSoft.MvvmLight;
-using MUOnlineCPUOptimizer.enums;
-using MUOnlineCPUOptimizer.ViewModels;
+using MUOnlineManager.enums;
+using MUOnlineManager.ViewModels;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MUOnlineCPUOptimizer.Optimizer
+namespace MUOnlineManager.Optimizer
 {
     public class MUInstance : ViewModelBase
     {
@@ -18,29 +20,51 @@ namespace MUOnlineCPUOptimizer.Optimizer
         private int index;
         private Process MUProcess;
         private PerformanceCounter cpuCounter;
+        private double cpuUsage;
 
-        public string ProcessName
+        public ObservableCollection<MUThread> Affinities { get; set; }
+        public IntPtr MainWindowHandle { get => MUProcess.MainWindowHandle; }
+        public string ProcessFileName { get => MUProcess.MainModule.FileName; }     
+        public string MainWindowTitle { get => MUProcess.MainWindowTitle; }
+        
+        public ProcessPriorityClass Priority
         {
             get
             {
-                string name = MUProcess.ProcessName;
+                return MUProcess.PriorityClass;
+            }
 
-                if(index != 0)
-                {
-                    name += "#" + index;
-                }
-
-                return name;
+            set
+            {
+                MUProcess.PriorityClass = value;
+                RaisePropertyChanged(() => Priority);
+                RaisePropertyChanged(() => PriorityString);
             }
         }
 
-        public string ProcessFileName { get => MUProcess.MainModule.FileName; }
-
-        public int BasePriority { get => MUProcess.BasePriority; }
-
-        public bool HasExited { get => MUProcess.HasExited; }
-
-        public string MainWindowTitle { get => MUProcess.MainWindowTitle; }
+        public string PriorityString
+        {
+            get
+            {
+                switch (Priority)
+                {
+                    case ProcessPriorityClass.Normal:
+                        return "Normal";
+                    case ProcessPriorityClass.Idle:
+                        return "Idle";
+                    case ProcessPriorityClass.High:
+                        return "Very High";
+                    case ProcessPriorityClass.RealTime:
+                        return "Real Time";
+                    case ProcessPriorityClass.BelowNormal:
+                        return "Low";
+                    case ProcessPriorityClass.AboveNormal:
+                        return "High";
+                    default:
+                        return "";
+                }
+            }
+        }
 
         public IntPtr Affinity
         {
@@ -55,9 +79,21 @@ namespace MUOnlineCPUOptimizer.Optimizer
             }
         }
 
-        //public ObservableCollection<MUThread> Threads { get; }
+        public string ProcessName
+        {
+            get
+            {
+                string name = MUProcess.ProcessName;
 
-        private double cpuUsage;
+                if (index != 0)
+                {
+                    name += "#" + index;
+                }
+
+                return name;
+            }
+        }
+        
         public double CpuUsage
         {
             get
@@ -68,22 +104,20 @@ namespace MUOnlineCPUOptimizer.Optimizer
             {
                 cpuUsage = value;
                 RaisePropertyChanged(() => CpuUsage);
+                
             }
         }
 
         public MUInstance(Process MUProcess, int index, Logger logger)
         {
             this.Logger = logger;
-            this.index = index;
-            // Threads = new ObservableCollection<MUThread>();
+            this.index = index; 
 
             this.MUProcess = MUProcess;
             cpuCounter = new PerformanceCounter("Process", "% Processor Time", this.ProcessName, true);
 
-            //foreach(ProcessThread thread in MUProcess.Threads)
-            //{
-            //    Threads.Add(new MUThread(thread));            
-            //}
+            Affinities = new ObservableCollection<MUThread>();
+            RefreshAffinities();
         }
 
         public void RefreshCpuUsage()
@@ -97,6 +131,26 @@ namespace MUOnlineCPUOptimizer.Optimizer
                 Logger.Log("Could not read CPU usage data for process: " + ProcessName);
                 Logger.Log(e.Message);
                 CpuUsage = 0;
+            }
+        }
+
+        public void RefreshAffinities()
+        {
+            string bits = Convert.ToString((int)Affinity, 2);
+            Affinities.Clear();
+
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
+                if(bits.Count() <= i)
+                {
+                    Affinities.Add(new MUThread(false));
+                }
+                else
+                {
+                    string character = bits[i].ToString();
+                    bool finalResult = Convert.ToBoolean(int.Parse(character));
+                    Affinities.Add(new MUThread(finalResult));
+                }
             }
         }
     }

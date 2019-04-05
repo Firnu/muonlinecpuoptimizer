@@ -1,27 +1,49 @@
 ﻿using GalaSoft.MvvmLight;
-using MUOnlineCPUOptimizer.enums;
-using MUOnlineCPUOptimizer.ViewModels;
+using MUOnlineManager.enums;
+using MUOnlineManager.ViewModels;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace MUOnlineCPUOptimizer.Optimizer
+namespace MUOnlineManager.Optimizer
 {
     public class CPUOptimizer : ViewModelBase
     {
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr handle);
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool ShowWindow(IntPtr handle, int nCmdShow);
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool IsIconic(IntPtr handle);
+
+        const int SW_RESTORE = 9;
+
         private Timer refreshTimer; 
         private Logger Logger;
-        private IntPtr maxAffinity;
-        private IntPtr halfAffinity;
-        private IntPtr quarterAffinity;
         private bool isInputEnabled = false;
+
+        private MUInstance selectedMUProcess;
+        public MUInstance SelectedMUProcess
+        {
+            get
+            {
+                return selectedMUProcess;
+            }
+            set
+            {
+                selectedMUProcess = value;
+                RaisePropertyChanged(() => SelectedMUProcess);
+            }
+        }
 
         public ObservableCollection<MUInstance> MuProcessesList { get; }
 
@@ -58,7 +80,7 @@ namespace MUOnlineCPUOptimizer.Optimizer
             int i = 0;
             foreach (Process process in proc)
             {
-                if(process.ProcessName == "GalaxyClient")
+                if(process.ProcessName == "main")
                 {
                     Logger.Log("Found running MU instance.");
                     MuProcessesList.Add(new MUInstance(process, i, Logger));
@@ -77,41 +99,102 @@ namespace MUOnlineCPUOptimizer.Optimizer
             }
         }
 
+        public void BringToFront()
+        {
+            if(SelectedMUProcess == null)
+            {
+                Logger.Log("No MU process selected.");
+                return;
+            }
+
+            IntPtr handle = SelectedMUProcess.MainWindowHandle;
+            if (IsIconic(handle))
+            {
+                ShowWindow(handle, SW_RESTORE);
+            }
+
+            SetForegroundWindow(handle);
+        }
+
+        public void ChangeName()
+        {
+            if (SelectedMUProcess == null)
+            {
+                Logger.Log("No MU process selected.");
+                return;
+            }
+        }
+
+        public void SetPriority(ProcessPriorityClass mode)
+        {
+            foreach (MUInstance instance in MuProcessesList)
+            {
+                instance.Priority = mode;
+            }
+        }
+
         public void SetAffinity(AffinityMode mode)
         {
             int runningClientsCount = MuProcessesList.Count;
+            bool[] threads = new bool[Environment.ProcessorCount];
 
-            IntPtr newAffinity;
-            switch (mode)
+            if(Environment.ProcessorCount == 1)
             {
-                case AffinityMode.Full:
-                    Logger.Log("Setting all MU clients to use all available CPU threads (affinity).");
-                    newAffinity = new IntPtr((int)(Math.Pow(Environment.ProcessorCount, 2) - 1));
-                    break;
-                case AffinityMode.Half:
-                    Logger.Log("Setting all MU clients to use half available CPU threads (affinity).");
-                    newAffinity = new IntPtr((int)(Math.Pow(Environment.ProcessorCount, 2) - 1));
-                    newAffinity = halfAffinity;
-                    break;
-                case AffinityMode.Quarter:
-                    Logger.Log("Setting all MU clients to use a quarter of available CPU threads (affinity).");
-                    newAffinity = new IntPtr((int)(Math.Pow(Environment.ProcessorCount, 2) - 1));
-                    newAffinity = quarterAffinity;
-                    break;
-                case AffinityMode.Spread:
-                    Logger.Log("Spreading all MU clients evenly among available CPU threads (affinity) - one thread per client if possible.");
-                    newAffinity = new IntPtr((int)(Math.Pow(Environment.ProcessorCount, 2) - 1));
-                    newAffinity = quarterAffinity;
-                    break;
-                default:
-                    Logger.Log("No affinity mode specified. Defaulting to use all available CPU affinity.");
-                    newAffinity = new IntPtr((int)(Math.Pow(Environment.ProcessorCount, 2) - 1));
-                    break;
+                Logger.Log("System has a single thread CPU available. Cannot work with CPU thread affinity.");
+                return;
             }
+
+            if(Environment.ProcessorCount < 4 && mode == AffinityMode.Quarter)
+            {
+                Logger.Log("System has less than four CPU threads available. Cannot reduce affinity usage to a quarter.");
+            }
+
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
+                if (mode == AffinityMode.Full)
+                {
+                    threads[i] = true;
+                }
+                else if (mode == AffinityMode.Half)
+                {
+                    if (i % 2 == 0)
+                    {
+                        threads[i] = true;
+                    }
+                    else
+                    {
+                        threads[i] = false;
+                    }
+                }
+                else if(mode == AffinityMode.Quarter)
+                {
+                    if (i % 4 == 0)
+                    {
+                        threads[i] = true;
+                    }
+                    else
+                    {
+                        threads[i] = false;
+                    }
+                }     
+            }
+            
+            BitArray bitArray = new BitArray(threads);
+
+            string bits = "";
+            foreach(bool bit in bitArray)
+            {
+                bits += Convert.ToInt32(bit);
+            }
+
+            int[] finalIntArray = new int[1];
+            bitArray.CopyTo(finalIntArray, 0);
+            int finalNumber = finalIntArray[0];
 
             foreach (MUInstance instance in MuProcessesList)
             {
-                instance.Affinity = newAffinity;
+                instance.Affinity = new IntPtr(finalNumber);
+                instance.RefreshAffinities();
             }
         }
 

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MUOnlineCPUOptimizer.ViewModels
+namespace MUOnlineManager.ViewModels
 {
     public class Logger : ViewModelBase
     {

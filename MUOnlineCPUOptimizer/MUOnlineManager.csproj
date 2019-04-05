@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{21EA318B-D1EE-43BA-94D4-92F63183887A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MUOnlineCPUOptimizer</RootNamespace>
-    <AssemblyName>MUOnlineCPUOptimizer</AssemblyName>
+    <RootNamespace>MUOnlineManager</RootNamespace>
+    <AssemblyName>MUOnlineManager</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -54,6 +54,9 @@
     <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.4.1.0, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -80,7 +83,10 @@
     <Compile Include="enums\AffinityMode.cs" />
     <Compile Include="Optimizer\CPUOptimizer.cs" />
     <Compile Include="Optimizer\MUInstance.cs" />
+    <Compile Include="Optimizer\MULauncher.cs" />
     <Compile Include="Optimizer\MUThread.cs" />
+    <Compile Include="Settings\GlobalSettings.cs" />
+    <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="ViewModels\Logger.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Page Include="MainWindow.xaml">

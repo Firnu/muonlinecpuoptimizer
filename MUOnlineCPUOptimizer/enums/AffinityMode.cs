@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MUOnlineCPUOptimizer.enums
+namespace MUOnlineManager.enums
 {
     public enum AffinityMode
     {
         Full,
         Half,
-        Quarter,
-        Spread
+        Quarter
     }
 }
