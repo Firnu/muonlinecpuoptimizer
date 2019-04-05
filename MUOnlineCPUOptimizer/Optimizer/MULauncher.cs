@@ -77,6 +77,8 @@ namespace MUOnlineManager.Optimizer
 
         private void LaunchClients()
         {
+            Logger.Log("Launching " + SettingsManager.Settings.MUClientsToLaunch + " additional MU online clients.");
+
             Task.Run(() =>
             {
                 for (int i = 0; i < SettingsManager.Settings.MUClientsToLaunch; i++)
