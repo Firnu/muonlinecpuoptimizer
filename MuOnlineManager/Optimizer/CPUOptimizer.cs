@@ -20,18 +20,21 @@ namespace MUOnlineManager.Optimizer
     {
         [System.Runtime.InteropServices.DllImport("User32.dll")]
         private static extern bool SetForegroundWindow(IntPtr handle);
+
         [System.Runtime.InteropServices.DllImport("User32.dll")]
         private static extern bool ShowWindow(IntPtr handle, int nCmdShow);
+
         [System.Runtime.InteropServices.DllImport("User32.dll")]
         private static extern bool IsIconic(IntPtr handle);
 
-        const int SW_RESTORE = 9;
+        private const int SW_RESTORE = 9;
 
-        private Timer refreshTimer; 
+        private Timer refreshTimer;
         private Logger Logger;
         private bool isInputEnabled = false;
 
         private MUInstance selectedMUProcess;
+
         public MUInstance SelectedMUProcess
         {
             get
@@ -56,7 +59,7 @@ namespace MUOnlineManager.Optimizer
             set
             {
                 isInputEnabled = value;
-                RaisePropertyChanged(()=> IsInputEnabled);
+                RaisePropertyChanged(() => IsInputEnabled);
             }
         }
 
@@ -80,28 +83,28 @@ namespace MUOnlineManager.Optimizer
             int i = 0;
             foreach (Process process in proc)
             {
-                if(process.ProcessName == "main")
+                if (process.ProcessName.ToUpper() == "MAIN" || process.ProcessName.ToUpper() == "MAIN.EXE")
                 {
-                    Logger.Log("Found running MU instance.");
                     MuProcessesList.Add(new MUInstance(process, i, Logger));
                     i++;
                 }
             }
 
-            if(MuProcessesList.Count == 0)
+            if (MuProcessesList.Count == 0)
             {
                 Logger.Log("Couldn't find running MU clients. Launch any MU client and refresh the list.");
                 IsInputEnabled = false;
             }
             else
             {
+                Logger.Log("Found " + MuProcessesList.Count() + " running MU instances.");
                 IsInputEnabled = true;
             }
         }
 
         public void BringToFront()
         {
-            if(SelectedMUProcess == null)
+            if (SelectedMUProcess == null)
             {
                 Logger.Log("No MU process selected.");
                 return;
@@ -138,13 +141,13 @@ namespace MUOnlineManager.Optimizer
             int runningClientsCount = MuProcessesList.Count;
             bool[] threads = new bool[Environment.ProcessorCount];
 
-            if(Environment.ProcessorCount == 1)
+            if (Environment.ProcessorCount == 1)
             {
                 Logger.Log("System has a single thread CPU available. Cannot work with CPU thread affinity.");
                 return;
             }
 
-            if(Environment.ProcessorCount < 4 && mode == AffinityMode.Quarter)
+            if (Environment.ProcessorCount < 4 && mode == AffinityMode.Quarter)
             {
                 Logger.Log("System has less than four CPU threads available. Cannot reduce affinity usage to a quarter.");
             }
@@ -166,7 +169,7 @@ namespace MUOnlineManager.Optimizer
                         threads[i] = false;
                     }
                 }
-                else if(mode == AffinityMode.Quarter)
+                else if (mode == AffinityMode.Quarter)
                 {
                     if (i % 4 == 0)
                     {
@@ -176,13 +179,13 @@ namespace MUOnlineManager.Optimizer
                     {
                         threads[i] = false;
                     }
-                }     
+                }
             }
-            
+
             BitArray bitArray = new BitArray(threads);
 
             string bits = "";
-            foreach(bool bit in bitArray)
+            foreach (bool bit in bitArray)
             {
                 bits += Convert.ToInt32(bit);
             }
@@ -200,17 +203,18 @@ namespace MUOnlineManager.Optimizer
 
         private void RefreshThreadItems(object state)
         {
-            if(Application.Current != null)
+            if (Application.Current != null)
             {
                 Application.Current.Dispatcher.BeginInvoke(
               DispatcherPriority.Normal,
-              new Action(() => {
+              new Action(() =>
+              {
                   foreach (MUInstance instance in MuProcessesList)
                   {
                       instance.RefreshCpuUsage();
                   }
               }));
-            }   
+            }
         }
     }
 }

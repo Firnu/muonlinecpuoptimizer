@@ -6,6 +6,7 @@ using MUOnlineManager.Settings;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace MUOnlineManager.ViewModels
         public RelayCommand BringToFront { get; set; }
         public RelayCommand ChangeName { get; set; }
 
+        public RelayCommand ShowAbout { get; set; }
+
         public MainWindowViewModel()
         {
             Logger = new Logger();
@@ -43,6 +46,7 @@ namespace MUOnlineManager.ViewModels
             SetQuarterAffinity = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Quarter));
             BringToFront = new RelayCommand(() => CpuOptimizer.BringToFront());
             ChangeName = new RelayCommand(() => CpuOptimizer.ChangeName());
+            ShowAbout = new RelayCommand(() => Process.Start(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "About.txt")));
 
             SetNormalPriority = new RelayCommand(() => CpuOptimizer.SetPriority(ProcessPriorityClass.Normal));
             SetLowPriority = new RelayCommand(() => CpuOptimizer.SetPriority(ProcessPriorityClass.BelowNormal));
