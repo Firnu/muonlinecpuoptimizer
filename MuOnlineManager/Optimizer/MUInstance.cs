@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -23,10 +24,13 @@ namespace MUOnlineManager.Optimizer
         private double cpuUsage;
 
         public ObservableCollection<MUThread> Affinities { get; set; }
+
+        public bool[] AffinityBytes { get; set; }
+
         public IntPtr MainWindowHandle { get => MUProcess.MainWindowHandle; }
-        public string ProcessFileName { get => MUProcess.MainModule.FileName; }     
+        public string ProcessFileName { get => MUProcess.MainModule.FileName; }
         public string MainWindowTitle { get => MUProcess.MainWindowTitle; }
-        
+
         public ProcessPriorityClass Priority
         {
             get
@@ -50,16 +54,22 @@ namespace MUOnlineManager.Optimizer
                 {
                     case ProcessPriorityClass.Normal:
                         return "Normal";
+
                     case ProcessPriorityClass.Idle:
                         return "Idle";
+
                     case ProcessPriorityClass.High:
                         return "Very High";
+
                     case ProcessPriorityClass.RealTime:
                         return "Real Time";
+
                     case ProcessPriorityClass.BelowNormal:
                         return "Low";
+
                     case ProcessPriorityClass.AboveNormal:
                         return "High";
+
                     default:
                         return "";
                 }
@@ -93,7 +103,7 @@ namespace MUOnlineManager.Optimizer
                 return name;
             }
         }
-        
+
         public double CpuUsage
         {
             get
@@ -104,14 +114,13 @@ namespace MUOnlineManager.Optimizer
             {
                 cpuUsage = value;
                 RaisePropertyChanged(() => CpuUsage);
-                
             }
         }
 
         public MUInstance(Process MUProcess, int index, Logger logger)
         {
             this.Logger = logger;
-            this.index = index; 
+            this.index = index;
 
             this.MUProcess = MUProcess;
             cpuCounter = new PerformanceCounter("Process", "% Processor Time", this.ProcessName, true);
@@ -136,21 +145,17 @@ namespace MUOnlineManager.Optimizer
 
         public void RefreshAffinities()
         {
-            string bits = Convert.ToString((int)Affinity, 2);
             Affinities.Clear();
 
-            for (int i = 0; i < Environment.ProcessorCount; i++)
+            var affinity = Affinity.ToInt32();
+            var b = new BitArray(new[] { affinity });
+
+            var bits = new bool[b.Count];
+            b.CopyTo(bits, 0);
+
+            for (var index = 0; index < Environment.ProcessorCount; index++)
             {
-                if(bits.Count() <= i)
-                {
-                    Affinities.Add(new MUThread(false));
-                }
-                else
-                {
-                    string character = bits[i].ToString();
-                    bool finalResult = Convert.ToBoolean(int.Parse(character));
-                    Affinities.Add(new MUThread(finalResult));
-                }
+                Affinities.Add(new MUThread(bits[index]));
             }
         }
     }

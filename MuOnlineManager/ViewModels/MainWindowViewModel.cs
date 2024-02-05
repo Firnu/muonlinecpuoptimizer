@@ -24,6 +24,10 @@ namespace MUOnlineManager.ViewModels
         public RelayCommand SetHalfAffinity { get; set; }
         public RelayCommand SetQuarterAffinity { get; set; }
 
+        public RelayCommand SetSpreadAffinityOne { get; set; }
+        public RelayCommand SetSpreadAffinityTwo { get; set; }
+        public RelayCommand SetSpreadAffinityThree { get; set; }
+
         public RelayCommand SetNormalPriority { get; set; }
         public RelayCommand SetLowPriority { get; set; }
 
@@ -44,6 +48,9 @@ namespace MUOnlineManager.ViewModels
             SetFullAffinity = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Full));
             SetHalfAffinity = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Half));
             SetQuarterAffinity = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Quarter));
+            SetSpreadAffinityOne = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Spread_One));
+            SetSpreadAffinityTwo = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Spread_Two));
+            SetSpreadAffinityThree = new RelayCommand(() => CpuOptimizer.SetAffinity(AffinityMode.Spread_Three));
             BringToFront = new RelayCommand(() => CpuOptimizer.BringToFront());
             ChangeName = new RelayCommand(() => CpuOptimizer.ChangeName());
             ShowAbout = new RelayCommand(() => Process.Start(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "About.txt")));

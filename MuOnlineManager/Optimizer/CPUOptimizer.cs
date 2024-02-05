@@ -83,7 +83,7 @@ namespace MUOnlineManager.Optimizer
             int i = 0;
             foreach (Process process in proc)
             {
-                if (process.ProcessName.ToUpper() == "MAIN" || process.ProcessName.ToUpper() == "MAIN.EXE")
+                if (process.ProcessName.ToUpper() == "GAME" || process.ProcessName.ToUpper() == "GAME.EXE")
                 {
                     MuProcessesList.Add(new MUInstance(process, i, Logger));
                     i++;
@@ -138,9 +138,6 @@ namespace MUOnlineManager.Optimizer
 
         public void SetAffinity(AffinityMode mode)
         {
-            int runningClientsCount = MuProcessesList.Count;
-            bool[] threads = new bool[Environment.ProcessorCount];
-
             if (Environment.ProcessorCount == 1)
             {
                 Logger.Log("System has a single thread CPU available. Cannot work with CPU thread affinity.");
@@ -150,7 +147,58 @@ namespace MUOnlineManager.Optimizer
             if (Environment.ProcessorCount < 4 && mode == AffinityMode.Quarter)
             {
                 Logger.Log("System has less than four CPU threads available. Cannot reduce affinity usage to a quarter.");
+                return;
             }
+
+            for (var index = 0; index < MuProcessesList.Count; index++)
+            {
+                var instance = MuProcessesList[index];
+                var instanceThreads = new InstanceThreads(instance);
+
+                bool[] threads;
+                if (mode == AffinityMode.Spread_One ||
+                    mode == AffinityMode.Spread_Three ||
+                    mode == AffinityMode.Spread_Two)
+                {
+                    threads = CreateSpreadAffinity(index, mode);
+                }
+                else
+                {
+                    threads = CreateSequentialAffinity(index, mode);
+                }
+
+                instanceThreads.SetThreads(threads);
+            }
+        }
+
+        private bool[] CreateSpreadAffinity(int instanceIndex, AffinityMode mode)
+        {
+            var threads = new bool[Environment.ProcessorCount];
+
+            switch (mode)
+            {
+                case AffinityMode.Spread_One:
+                    threads[instanceIndex % Environment.ProcessorCount] = true;
+                    break;
+
+                case AffinityMode.Spread_Two:
+                    threads[instanceIndex % Environment.ProcessorCount] = true;
+                    threads[(instanceIndex + 1) % Environment.ProcessorCount] = true;
+                    break;
+
+                case AffinityMode.Spread_Three:
+                    threads[instanceIndex % Environment.ProcessorCount] = true;
+                    threads[(instanceIndex + 1) % Environment.ProcessorCount] = true;
+                    threads[(instanceIndex + 2) % Environment.ProcessorCount] = true;
+                    break;
+            }
+
+            return threads;
+        }
+
+        private bool[] CreateSequentialAffinity(int instanceIndex, AffinityMode mode)
+        {
+            var threads = new bool[Environment.ProcessorCount];
 
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
@@ -182,23 +230,7 @@ namespace MUOnlineManager.Optimizer
                 }
             }
 
-            BitArray bitArray = new BitArray(threads);
-
-            string bits = "";
-            foreach (bool bit in bitArray)
-            {
-                bits += Convert.ToInt32(bit);
-            }
-
-            int[] finalIntArray = new int[1];
-            bitArray.CopyTo(finalIntArray, 0);
-            int finalNumber = finalIntArray[0];
-
-            foreach (MUInstance instance in MuProcessesList)
-            {
-                instance.Affinity = new IntPtr(finalNumber);
-                instance.RefreshAffinities();
-            }
+            return threads;
         }
 
         private void RefreshThreadItems(object state)
@@ -214,6 +246,38 @@ namespace MUOnlineManager.Optimizer
                       instance.RefreshCpuUsage();
                   }
               }));
+            }
+        }
+
+        public class InstanceThreads
+        {
+            public MUInstance Instance { get; }
+
+            public bool[] Threads { get; private set; }
+
+            public InstanceThreads(MUInstance instance)
+            {
+                Instance = instance;
+                Threads = new bool[Environment.ProcessorCount];
+            }
+
+            public void SetThreads(bool[] threads)
+            {
+                Threads = threads;
+                SetThreadBits(Threads);
+            }
+
+            private void SetThreadBits(bool[] threads)
+            {
+                var bitArray = new BitArray(threads);
+
+                var finalIntArray = new int[1];
+                bitArray.CopyTo(finalIntArray, 0);
+                var finalNumber = finalIntArray[0];
+
+                Instance.AffinityBytes = threads;
+                Instance.Affinity = new IntPtr(finalNumber);
+                Instance.RefreshAffinities();
             }
         }
     }

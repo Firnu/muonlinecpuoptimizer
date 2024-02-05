@@ -14,8 +14,8 @@
         xmlns:local="clr-namespace:MUOnlineManager"
         mc:Ignorable="d"
         Icon="./Images/favicon.ico"
-        Title="MU Online Manager" 
-        Height="640" Width="1024" 
+        Title="MU Online Manager"
+        Height="640" Width="1024"
         MinHeight="640" MinWidth="1024">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -28,7 +28,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            
+
             <GroupBox x:Name="ActionsGroupBox" Grid.Row="0">
                 <GroupBox.HeaderTemplate>
                     <DataTemplate>
@@ -41,7 +41,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
-                
+
                 <StackPanel Orientation="Vertical" Grid.Row="0">
                     <StackPanel Orientation="Vertical">
                         <Grid Margin="10 10 10 0">
@@ -79,19 +79,19 @@
 
                             <TextBlock Grid.Column="0" Margin="0 0 10 0" VerticalAlignment="Center" Text="How many MU clients would you like to launch?" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Content="-" Command="{Binding MULauncher.DecreaseClientsNumber}" 
+                                <Button Content="-" Command="{Binding MULauncher.DecreaseClientsNumber}"
                                         Style="{StaticResource MaterialDesignFloatingActionMiniButton}" Width="25" Height="25" />
                                 <TextBlock Text="{Binding MULauncher.ClientsToLaunch}" Width="25" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" />
                                 <Button Content="+" Command="{Binding MULauncher.IncreaseClientsNumber}"
                                         Style="{StaticResource MaterialDesignFloatingActionMiniButton}" Width="25" Height="25" />
                             </StackPanel>
-                            <Button Grid.Column="2" Content="Launch" Width="100" Margin="10 0" IsEnabled="{Binding MULauncher.IsReadyToLaunch}" 
+                            <Button Grid.Column="2" Content="Launch" Width="100" Margin="10 0" IsEnabled="{Binding MULauncher.IsReadyToLaunch}"
                                     Command="{Binding MULauncher.Launch}" Style="{StaticResource MaterialDesignRaisedAccentButton}" />
                         </Grid>
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical">
-                        <Grid Margin="10 50 10 0">
+                        <Grid Margin="10 20 10 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
@@ -135,7 +135,99 @@
                                 </materialDesign:PackIcon.ToolTip>
                             </materialDesign:PackIcon>
 
-                            <TextBlock Grid.Column="1" Text="Set CPU affinity for all MU clients." VerticalAlignment="Center" Margin="10 0"/>
+                            <materialDesign:PackIcon Kind="About" Grid.Column="0" Width="25" Height="25" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                     ToolTipService.InitialShowDelay="1" ToolTipService.ShowDuration="99999" Background="Transparent">
+                                <materialDesign:PackIcon.ToolTip>
+                                    <StackPanel Orientation="Vertical" Width="300">
+                                        <TextBlock FontWeight="Bold" Text="CPU Affinity setter" />
+                                        <TextBlock Text="This option allows you to change all running MU game clients CPU affinity with a single click." TextWrapping="Wrap" />
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <TextBlock Text="By clicking one of the options it will change all active MU processes CPU affinity." TextWrapping="Wrap" />
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <TextBlock Text="MU tends to eat up any CPU cycles the system provides so this option allows you to conveniently limit how many logical CPU cores will work on MU." TextWrapping="Wrap" />
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <Grid Width="300" HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Column="0" Grid.Row="0" Text="One" FontWeight="Bold" HorizontalAlignment="Center" Margin="5 5 10 5" />
+                                            <TextBlock Grid.Column="1" Grid.Row="0" Text="MU clients will receive one core each as long as you have enough cores in the system. If your core amount will end - the core sharing will repeat again." TextWrapping="Wrap" />
+
+                                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Two" FontWeight="Bold" HorizontalAlignment="Center" Margin="5 5 10 5" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" Text="MU clients will receive two core each as long as you have enough cores in the system. If your core amount will end - the core sharing will repeat again." TextWrapping="Wrap" />
+
+                                            <TextBlock Grid.Column="0" Grid.Row="2" Text="Three" FontWeight="Bold" HorizontalAlignment="Center" Margin="5 5 10 5" />
+                                            <TextBlock Grid.Column="1" Grid.Row="2" Text="MU clients will receive two core each as long as you have enough cores in the system. If your core amount will end - the core sharing will repeat again." TextWrapping="Wrap" />
+                                        </Grid>
+
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <TextBlock Text="Limiting the amount of logical CPU cores for MU can help with your CPU temperatures, provide more CPU power when working with a computer and generally limit the influence of MU on your machine performance when it plays in the background." TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </materialDesign:PackIcon.ToolTip>
+                            </materialDesign:PackIcon>
+
+                            <TextBlock Grid.Column="1" Text="Spread CPU affinity for all MU clients." VerticalAlignment="Center" Margin="10 0" />
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="One" Width="85" Margin="3 0" Command="{Binding SetSpreadAffinityOne}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+                                <Button Content="Two" Width="85" Margin="3 0" Command="{Binding SetSpreadAffinityTwo}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+                                <Button Content="Three" Width="85" Margin="3 0" Command="{Binding SetSpreadAffinityThree}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="10 20 10 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:PackIcon Kind="About" Grid.Column="0" Width="25" Height="25" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                     ToolTipService.InitialShowDelay="1" ToolTipService.ShowDuration="99999" Background="Transparent">
+                                <materialDesign:PackIcon.ToolTip>
+                                    <StackPanel Orientation="Vertical" Width="300">
+                                        <TextBlock FontWeight="Bold" Text="CPU Affinity setter" />
+                                        <TextBlock Text="This option allows you to change all running MU game clients CPU affinity with a single click." TextWrapping="Wrap" />
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <TextBlock Text="By clicking one of the options it will change all active MU processes CPU affinity." TextWrapping="Wrap" />
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <TextBlock Text="MU tends to eat up any CPU cycles the system provides so this option allows you to conveniently limit how many logical CPU cores will work on MU." TextWrapping="Wrap" />
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <Grid Width="300" HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Column="0" Grid.Row="0" Text="Quarter" FontWeight="Bold" HorizontalAlignment="Center" Margin="5 5 10 5" />
+                                            <TextBlock Grid.Column="1" Grid.Row="0" Text="MU clients will have every 4th logical CPU core enabled for them." TextWrapping="Wrap" />
+
+                                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Half" FontWeight="Bold" HorizontalAlignment="Center" Margin="5 5 10 5" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" Text="MU clients will have every 2nd logical CPU core enabled for them." TextWrapping="Wrap" />
+
+                                            <TextBlock Grid.Column="0" Grid.Row="2" Text="Full" FontWeight="Bold" HorizontalAlignment="Center" Margin="5 5 10 5" />
+                                            <TextBlock Grid.Column="1" Grid.Row="2" Text="MU clients will have all logical CPU core enabled for them." TextWrapping="Wrap" />
+                                        </Grid>
+
+                                        <TextBlock Text=" " TextWrapping="Wrap" />
+                                        <TextBlock Text="Limiting the amount of logical CPU cores for MU can help with your CPU temperatures, provide more CPU power when working with a computer and generally limit the influence of MU on your machine performance when it plays in the background." TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </materialDesign:PackIcon.ToolTip>
+                            </materialDesign:PackIcon>
+
+                            <TextBlock Grid.Column="1" Text="Set CPU affinity for all MU clients." VerticalAlignment="Center" Margin="10 0" />
 
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
                                 <Button Content="Quarter" Width="85" Margin="3 0" Command="{Binding SetQuarterAffinity}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
@@ -146,7 +238,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical">
-                        <Grid Margin="10 50 10 0">
+                        <Grid Margin="10 20 10 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
@@ -187,7 +279,7 @@
                                 </materialDesign:PackIcon.ToolTip>
                             </materialDesign:PackIcon>
 
-                            <TextBlock Grid.Column="1" Text="Set CPU priority for all MU clients." VerticalAlignment="Center" Margin="10 0"/>
+                            <TextBlock Grid.Column="1" Text="Set CPU priority for all MU clients." VerticalAlignment="Center" Margin="10 0" />
 
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
                                 <Button Content="Low" Width="85" Margin="3 0" Command="{Binding SetLowPriority}" IsEnabled="{Binding CpuOptimizer.IsInputEnabled}" />
@@ -216,8 +308,8 @@
                 <DataTemplate>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="MU instances" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3" />
-                        <TextBlock Text="(double click the MU instance to bring its window to the front.)" FontSize="10" Margin="3" VerticalAlignment="Center" HorizontalAlignment="Center"  />
-                        
+                        <TextBlock Text="(double click the MU instance to bring its window to the front.)" FontSize="10" Margin="3" VerticalAlignment="Center" HorizontalAlignment="Center" />
+
                         <Button Command="{Binding ElementName=ProcessListView, Path=DataContext.RefreshMuProcessess}" HorizontalAlignment="Center" Margin="10 0 0 0"
                                 Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" Width="20" Height="20" ToolTip="Refresh MU clients list.">
                             <materialDesign:PackIcon Kind="Refresh" Height="15" Width="15" />
@@ -235,7 +327,7 @@
                                 <TextBlock Text=" " />
                                 <TextBlock Text="{Binding ProcessName}" />
                             </StackPanel>
-                            
+
                             <TextBlock Text="{Binding ProcessFileName}" Margin="0 5" />
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -243,7 +335,7 @@
                                 <ItemsControl ItemsSource="{Binding Affinities, Mode=OneWay}" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"/>
+                                            <StackPanel Orientation="Horizontal" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
@@ -256,14 +348,14 @@
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0 5">
                                 <TextBlock Text="Process priority: " FontWeight="Bold" />
-                                <TextBlock Text="{Binding PriorityString}"  />
+                                <TextBlock Text="{Binding PriorityString}" />
                             </StackPanel>
 
                             <StackPanel HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                     <TextBlock Text="CPU use: " FontWeight="Bold" />
-                                    <TextBlock Text="{Binding CpuUsage}"  />
-                                    <TextBlock Text="%"  />
+                                    <TextBlock Text="{Binding CpuUsage}" />
+                                    <TextBlock Text="%" />
                                 </StackPanel>
 
                                 <ProgressBar HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="10"  Margin="0 5 0 0"

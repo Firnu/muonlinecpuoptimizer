@@ -10,6 +10,9 @@ namespace MUOnlineManager.enums
     {
         Full,
         Half,
-        Quarter
+        Quarter,
+        Spread_One,
+        Spread_Two,
+        Spread_Three,
     }
 }
